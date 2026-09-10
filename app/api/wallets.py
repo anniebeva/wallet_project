@@ -1,0 +1,43 @@
+from uuid import UUID
+
+from fastapi import APIRouter, Depends
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.core.database import get_session
+from app.schemas.wallets import WalletOperationRequest, WalletResponse
+from app.services.wallets_service import WalletService
+from app.repositories.wallets_repository import WalletRepository
+
+
+router = APIRouter(
+    prefix='/api/v1/wallets',
+    tags=['wallets'],
+)
+
+
+@router.post('/{wallet_id}/operation', response_model=WalletResponse)
+async def process_operation(
+    wallet_id: UUID,
+    operation: WalletOperationRequest,
+    session: AsyncSession = Depends(get_session),
+):
+    """Process wallet operation"""
+    repository = WalletRepository(session)
+    service = WalletService(repository)
+
+    return await service.process_operation(
+        wallet_id,
+        operation.operation_type,
+        operation.amount,
+    )
+
+@router.get('/{wallet_id}', response_model=WalletResponse)
+async def get_wallet_balance(
+    wallet_id: UUID,
+    session: AsyncSession = Depends(get_session),
+):
+    """Get current wallet balance"""
+    repository = WalletRepository(session)
+    service = WalletService(repository)
+
+    return await service.get_wallet(wallet_id)
