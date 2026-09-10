@@ -1,12 +1,15 @@
+from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy.ext.asyncio import AsyncSession
 from uuid import UUID
 
-from fastapi import APIRouter, Depends
-from sqlalchemy.ext.asyncio import AsyncSession
-
 from app.core.database import get_session
-from app.schemas.wallets import WalletOperationRequest, WalletResponse
-from app.services.wallets_service import WalletService
 from app.repositories.wallets_repository import WalletRepository
+from app.schemas.wallets import WalletOperationRequest, WalletResponse
+from app.services.wallets_service import (
+    InsufficientFundsError,
+    WalletNotFoundError,
+    WalletService,
+)
 
 
 router = APIRouter(
@@ -25,11 +28,16 @@ async def process_operation(
     repository = WalletRepository(session)
     service = WalletService(repository)
 
-    return await service.process_operation(
-        wallet_id,
-        operation.operation_type,
-        operation.amount,
-    )
+    try:
+        return await service.process_operation(
+            wallet_id,
+            operation.operation_type,
+            operation.amount,
+        )
+    except WalletNotFoundError:
+        raise HTTPException(status_code=404, detail='Wallet not found')
+    except InsufficientFundsError:
+        raise HTTPException(status_code=400, detail='Insufficient funds')
 
 @router.get('/{wallet_id}', response_model=WalletResponse)
 async def get_wallet_balance(
