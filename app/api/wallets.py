@@ -48,4 +48,7 @@ async def get_wallet_balance(
     repository = WalletRepository(session)
     service = WalletService(repository)
 
-    return await service.get_wallet(wallet_id)
+    try:
+        return await service.get_wallet(wallet_id)
+    except WalletNotFoundError:
+        raise HTTPException(status_code=404, detail='Wallet not found')
