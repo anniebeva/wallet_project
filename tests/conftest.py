@@ -13,7 +13,7 @@ async def client():
 
     async with AsyncClient(
         transport=transport,
-        base_url='http://test',
+        base_url="http://test",
     ) as client:
         yield client
 

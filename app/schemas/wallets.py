@@ -8,8 +8,8 @@ from pydantic import BaseModel, Field
 class OperationType(str, Enum):
     """Operation type"""
 
-    DEPOSIT = 'DEPOSIT'
-    WITHDRAW = 'WITHDRAW'
+    DEPOSIT = "DEPOSIT"
+    WITHDRAW = "WITHDRAW"
 
 
 class WalletOperationRequest(BaseModel):

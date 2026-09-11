@@ -23,9 +23,6 @@ class WalletRepository:
     async def get_for_update(self, wallet_id: UUID):
         """Get wallet for update"""
         result = await self.session.execute(
-            select(Wallet)
-            .where(Wallet.id == wallet_id)
-            .with_for_update()
+            select(Wallet).where(Wallet.id == wallet_id).with_for_update()
         )
         return result.scalar_one_or_none()
-
