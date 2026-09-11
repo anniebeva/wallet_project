@@ -1,3 +1,4 @@
+import asyncio
 from uuid import uuid4
 
 import pytest
@@ -112,3 +113,30 @@ async def test_invalid_operation_type(client, wallet):
     )
 
     assert response.status_code == 422
+
+
+@pytest.mark.asyncio
+async def test_concurrent_withdrawals(client, wallet):
+    """Handle concurrent withdrawals safely"""
+    payload = {
+        "operation_type": "WITHDRAW",
+        "amount": 800,
+    }
+
+    responses = await asyncio.gather(
+        client.post(
+            f"/api/v1/wallets/{wallet.id}/operation",
+            json=payload,
+        ),
+        client.post(
+            f"/api/v1/wallets/{wallet.id}/operation",
+            json=payload,
+        ),
+    )
+
+    assert sorted(response.status_code for response in responses) == [200, 400]
+
+    response = await client.get(f"/api/v1/wallets/{wallet.id}")
+
+    assert response.status_code == 200
+    assert response.json()["balance"] == "200.00"
