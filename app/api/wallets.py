@@ -6,8 +6,11 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.database import get_session
 from app.repositories.wallets_repository import WalletRepository
 from app.schemas.wallets import WalletOperationRequest, WalletResponse
-from app.services.wallets_service import (InsufficientFundsError,
-                                          WalletNotFoundError, WalletService)
+from app.services.wallets_service import (
+    InsufficientFundsError,
+    WalletNotFoundError,
+    WalletService,
+)
 
 router = APIRouter(
     prefix="/api/v1/wallets",
